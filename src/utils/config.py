@@ -41,10 +41,16 @@ class Config:
         raise AttributeError(f"Config has no attribute '{name}'")
     
     def get(self, name: str, default: Any = None) -> Any:
-        return self._config.get(name, default)
+        value = self._config.get(name, default)
+        if isinstance(value, dict):
+            return Config(value)
+        return value
     
     def __getitem__(self, key: str) -> Any:
-        return self._config[key]
+        value = self._config[key]
+        if isinstance(value, dict):
+            return Config(value)
+        return value
     
     def __contains__(self, key: str) -> bool:
         return key in self._config
