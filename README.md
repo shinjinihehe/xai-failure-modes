@@ -1,10 +1,34 @@
-# IPTA 2026 XAI Benchmarking
+# When Explainability Goes Silent: Diagnosing XAI Failure Modes in Medical Imaging
 
-**When Explainability Goes Silent: Diagnosing XAI Failure Modes in Medical Imaging**
+[![CI](https://github.com/shinjinihehe/xai-failure-modes/actions/workflows/ci.yml/badge.svg)](https://github.com/shinjinihehe/xai-failure-modes/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Venue: IPTA 2026](https://img.shields.io/badge/Venue-IPTA%202026-brightgreen.svg)]()
 
-This repository contains the official codebase for the accepted IPTA 2026 paper on XAI faithfulness evaluation across CNN, Transformer, and VLM architectures in medical imaging. It is being released publicly upon acceptance.
+Official PyTorch implementation and diagnostic benchmark for **"When Explainability Goes Silent: Diagnosing XAI Failure Modes in Medical Imaging"** (IPTA 2026).
 
-## Overview
+---
+
+## 🔬 Key Scientific Findings
+
+This benchmark provides a cross-architecture faithfulness diagnostic spanning **CNN, Vision Transformer, and VLM** families across both **classification** (BUSI) and **segmentation** (Kvasir-SEG):
+
+1. **The Applicability Gap as a Clinical Risk**: Grad-CAM/Grad-CAM++ applied to ViT and VLM backbones via patch-token spatial reshaping yields deceptively favourable scores (Deletion AUC $\approx$ 0.24) from an architecturally unjustified mapping.
+2. **Paradoxical Faithfulness Collapse**: LIME exhibits high Deletion AUC (0.84–0.94) on supervised backbones (removing salient superpixels barely lowers confidence), yet functions normally (0.45) on contrastive BiomedCLIP, inverting the expected difficulty hierarchy.
+3. **Integrated Gradients as the Safe Default**: Integrated Gradients is the only evaluated method whose Deletion AUC stays strictly below 0.43 across all architecture families.
+4. **Non-Transferability**: Cross-dataset stress tests on ISIC-2018 and DRIVE show faithfulness rankings do not transfer across imaging modalities.
+
+| Architecture Family | Models | Grad-CAM / ++ | Integrated Gradients | LIME | SHAP | Occlusion |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| **CNN** | ResNet-50, DenseNet-121 | 0.69 / 0.45 | 0.65 / 0.35 | 0.63 / **0.89** | 0.64 / 0.37 | 0.66 / 0.43 |
+| **Transformer** | ViT-B/16 | 0.75 / 0.24* | 0.72 / 0.30 | 0.69 / **0.94** | 0.70 / 0.32 | 0.81 / 0.28 |
+| **VLM** | BiomedCLIP | 0.51 / 0.35* | 0.52 / 0.37 | 0.48 / 0.45 | 0.50 / 0.39 | 0.55 / 0.34 |
+
+*Values report Mean Insertion AUC / Deletion AUC on BUSI (lower Deletion is better). `*` indicates patch-token reshape approximation.*
+
+---
+
+## 📌 Overview
 
 - **Task**: Classification (BUSI breast ultrasound) + Segmentation (Kvasir-SEG colonoscopy)
 - **Models**: 7 models across 3 architecture families
