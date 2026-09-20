@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Generated experiments and checkpoints
+outputs/*
+!outputs/.gitkeep
+!outputs/checkpoints/
+outputs/checkpoints/*
+!outputs/checkpoints/.gitkeep
+!outputs/results/
+outputs/results/*
+!outputs/results/.gitkeep
+!outputs/figures/
+outputs/figures/*
+!outputs/figures/.gitkeep
+!outputs/xai_maps/
+outputs/xai_maps/*
+!outputs/xai_maps/.gitkeep
+!outputs/splits/
+outputs/splits/*
+!outputs/splits/.gitkeep
+*.pth
+*.pkl
+
+# Data
+data/
+*.npy
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Paper directory (not distributed via git; obtain from the conference proceedings)
+paper/
+wandb/
+.env

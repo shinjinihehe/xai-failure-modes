@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the associated IPTA 2026 paper."
+title: "When Explainability Goes Silent: Diagnosing XAI Failure Modes in Medical Imaging"
+type: software
+version: 1.0.0
+date-released: 2026-01-01
+authors:
+  - name: "IPTA 2026 XAI Benchmark authors"
+license: MIT
+repository-code: "https://github.com/shinjinihehe/xai-failure-modes"

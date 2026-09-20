@@ -1,0 +1,195 @@
+# Base configuration for IPTA 2026 XAI Benchmarking
+# All paths are relative to project root
+
+project:
+  name: "ipta2026-xai"
+  seed: 42
+  device: "auto"  # auto, cuda, cpu
+
+paths:
+  data_root: "data"
+  outputs_root: "outputs"
+  checkpoints_dir: "outputs/checkpoints"
+  xai_maps_dir: "outputs/xai_maps"
+  results_dir: "outputs/results"
+  figures_dir: "outputs/figures"
+
+data:
+  busi:
+    root: "data/BUSI"
+    classes: ["benign", "malignant", "normal"]
+    img_size: 224
+    train_split: 0.7
+    val_split: 0.15
+    test_split: 0.15
+    augmentation:
+      horizontal_flip: true
+      rotation: 15
+      color_jitter:
+        brightness: 0.2
+        contrast: 0.2
+    normalization:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+    num_workers: 4
+    pin_memory: true
+
+  kvasir_seg:
+    root: "data/Kvasir-SEG"
+    img_size: 224
+    train_split: 0.7
+    val_split: 0.15
+    test_split: 0.15
+    normalization:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+    num_workers: 4
+    pin_memory: true
+
+models:
+  classification:
+    resnet50:
+      family: "CNN"
+      backbone: "resnet50"
+      pretrained: "imagenet1k_v2"
+      num_classes: 3
+      head_type: "linear"
+      lr: 3e-5
+      lr_multiplier: 1.0
+
+    densenet121:
+      family: "CNN"
+      backbone: "densenet121"
+      pretrained: "imagenet1k_v1"
+      num_classes: 3
+      head_type: "linear"
+      lr: 3e-5
+      lr_multiplier: 1.0
+
+    vit_b16:
+      family: "Transformer"
+      backbone: "vit_base_patch16_224"
+      pretrained: "imagenet21k+imagenet2012"
+      num_classes: 3
+      head_type: "linear"
+      lr: 3e-5
+      lr_multiplier: 0.5
+
+    biomedclip:
+      family: "VLM"
+      backbone: "hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224"
+      num_classes: 3
+      head_type: "layernorm_linear"
+      freeze_encoder: true
+      unfreeze_last_n_blocks: 2
+      lr: 3e-5
+      lr_multiplier: 0.1
+
+  segmentation:
+    unet:
+      family: "CNN"
+      architecture: "unet"
+      encoder: "resnet34"
+      encoder_weights: "imagenet"
+      in_channels: 3
+      classes: 1
+      lr: 1e-4
+
+    transunet:
+      family: "Transformer"
+      architecture: "segformer"
+      encoder: "mit_b2"
+      encoder_weights: "imagenet"
+      in_channels: 3
+      classes: 1
+      lr: 1e-4
+
+    sam_adapter:
+      family: "VLM"
+      architecture: "sam_adapter"
+      sam_checkpoint: "sam_vit_b_01ec64.pth"
+      freeze_image_encoder: true
+      freeze_prompt_encoder: true
+      train_mask_decoder: true
+      batch_size: 2
+      lr: 1e-4
+      lr_multiplier: 1.0
+      epochs: 15
+
+training:
+  classification:
+    # Camera-ready protocol: 50 epochs, cosine schedule, peak LR 3e-5.
+    epochs: 50
+    batch_size: 16
+    optimizer: "adamw"
+    weight_decay: 1e-4
+    scheduler: "cosine"
+    early_stopping_patience: 10
+    resume: true
+
+  segmentation:
+    # Camera-ready protocol: 100 epochs, batch size 8.
+    epochs: 100
+    batch_size: 8
+    optimizer: "adamw"
+    weight_decay: 1e-4
+    scheduler: "cosine"
+    early_stopping_patience: 10
+    resume: true
+
+  mixed_precision: true
+  gradient_clipping: 1.0
+
+xai:
+  methods:
+    gradcam:
+      enabled: true
+      use_plus_plus: false
+    gradcampp:
+      enabled: true
+    integrated_gradients:
+      enabled: true
+      n_steps: 50
+      internal_batch_size: 4
+    lime:
+      enabled: true
+      num_samples: 200
+      num_features: 10
+      hide_color: 0
+      segmenter: "quickshift"
+      segmenter_params:
+        kernel_size: 4
+        max_dist: 200
+        ratio: 0.2
+    shap:
+      enabled: true
+      method: "kernel"
+      background_samples: 16
+      background_clusters: 10
+      nsamples: 32
+    occlusion:
+      enabled: true
+      patch_size: 16
+      stride: 8
+
+  evaluation_subset:
+    classification: 20  # number of test images to evaluate
+    segmentation: 20
+
+metrics:
+  insertion_deletion:
+    n_steps: 10
+  sparsity_threshold: 0.5
+  pointing_game_threshold: 0.5
+
+visualization:
+  dpi: 120
+  figsize_clf_grid: [18, 12]
+  figsize_seg_grid: [20, 10]
+  figsize_heatmaps: [18, 5]
+  figsize_family_bars: [18, 5]
+
+# Vit reshape transform for GradCAM
+vit_reshape:
+  patch_size: 16
+  img_size: 224
