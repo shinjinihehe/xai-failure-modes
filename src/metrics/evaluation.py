@@ -10,6 +10,10 @@ import torch.nn.functional as F
 from typing import Tuple, List
 
 
+# np.trapezoid was introduced in NumPy 2.0; np.trapz is deprecated in 2.0+
+_trapezoid = getattr(np, "trapezoid", getattr(np, "trapz", None))
+
+
 def faithfulness_deletion(
     model: torch.nn.Module,
     img_tensor: torch.Tensor,
@@ -42,9 +46,7 @@ def faithfulness_deletion(
             p = F.softmax(model(t), dim=1)[0, target_class].item()
         probs.append(p)
     
-    # np.trapezoid was introduced after NumPy 1.24; np.trapz keeps the
-    # published environment compatible with the declared dependency floor.
-    auc = float(np.trapz(probs, dx=1/n_steps))
+    auc = float(_trapezoid(probs, dx=1/n_steps))
     return auc, probs
 
 
@@ -85,7 +87,7 @@ def faithfulness_insertion(
             p = F.softmax(model(t), dim=1)[0, target_class].item()
         probs.append(p)
     
-    auc = float(np.trapz(probs, dx=1/n_steps))
+    auc = float(_trapezoid(probs, dx=1/n_steps))
     return auc, probs
 
 
@@ -129,7 +131,8 @@ def seg_faithfulness(
                          dtype=torch.float32).to(device)
         scores.append(fg_score(model, t))
     
-    return float(np.trapz(scores, dx=1 / n_steps))
+    return float(_trapezoid(scores, dx=1 / n_steps))
+
 
 
 def pointing_game(

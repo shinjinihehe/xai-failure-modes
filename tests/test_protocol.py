@@ -50,14 +50,15 @@ def test_training_hyperparameters():
     clf = cfg.training.classification
     assert clf.batch_size == 16, "Paper §III: classification batch size 16"
     assert clf.scheduler == "cosine", "Paper §III: cosine LR schedule"
-    assert clf.weight_decay == 1e-4, "Paper §III: AdamW weight decay 1e-4"
+    assert float(clf.weight_decay) == 1e-4, "Paper §III: AdamW weight decay 1e-4"
     for name in ("resnet50", "densenet121", "vit_b16", "biomedclip"):
-        lr = cfg.models.classification[name].lr
+        lr = float(cfg.models.classification[name].lr)
         assert lr == 3e-5, f"Paper §III: peak LR 3e-5 for {name}"
     seg = cfg.training.segmentation
     assert seg.batch_size == 8, "Paper §III: segmentation batch size 8"
+    assert float(seg.weight_decay) == 1e-4, "Paper §III: AdamW weight decay 1e-4"
     for seg_name in ("unet", "transunet"):
-        lr = cfg.models.segmentation[seg_name].lr
+        lr = float(cfg.models.segmentation[seg_name].lr)
         assert lr == 1e-4, f"Paper §III: peak LR 1e-4 for {seg_name}"
 
 
